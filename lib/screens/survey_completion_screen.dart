@@ -555,19 +555,13 @@ class _SurveyCompletionScreenState extends State<SurveyCompletionScreen> with Ti
           actions: [
             SizedBox(
               width: double.infinity,
-              child: ElevatedButton(
+              child: ElevatedButton.icon(
                 onPressed: () {
                   Navigator.of(context).pop();
-                  _navigateToHome(context);
+                  Navigator.pushReplacementNamed(context, '/survey-analytics');
                 },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.green,
-                  foregroundColor: Colors.white,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                ),
-                child: const Text('Back to Home'),
+                icon: const Icon(Icons.analytics),
+                label: const Text('View Analytics'),
               ),
             ),
           ],

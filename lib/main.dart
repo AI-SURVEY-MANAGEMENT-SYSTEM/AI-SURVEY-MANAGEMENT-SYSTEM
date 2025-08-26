@@ -5,13 +5,9 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'providers/language_provider.dart';
 import 'providers/survey_provider.dart';
-import 'screens/home_screen.dart';
 import 'screens/onboarding_screen.dart';
-import 'screens/language_selection_screen.dart';
-import 'screens/survey_analytics_screen.dart';
-import 'screens/login_screen.dart';
-import 'screens/register_screen.dart';
 import 'utils/language_utils.dart';
+import 'routes/app_router.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -48,11 +44,9 @@ class MyApp extends StatelessWidget {
                 seedColor: const Color(0xFF5B5FE9),
                 primary: const Color(0xFF5B5FE9),
                 secondary: const Color(0xFF00C6AE),
-                background: const Color(0xFFF7F8FA),
                 surface: Colors.white,
                 onPrimary: Colors.white,
                 onSecondary: Colors.white,
-                onBackground: Colors.black,
                 onSurface: Colors.black,
                 brightness: Brightness.light,
               ),
@@ -122,13 +116,8 @@ class MyApp extends StatelessWidget {
             ],
             supportedLocales: LanguageUtils.supportedLocales,
             locale: languageProvider.currentLocale,
-            home: const OnboardingScreen(),
-            routes: {
-              '/login': (context) => LoginScreen(),
-              '/register': (context) => RegisterScreen(),
-              '/language-selection': (context) => LanguageSelectionScreen(),
-              '/survey-analytics': (context) => SurveyAnalyticsScreen(),
-            },
+            initialRoute: AppRoutes.onboarding,
+            onGenerateRoute: AppRouter.generateRoute,
           );
         },
       ),

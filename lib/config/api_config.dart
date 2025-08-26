@@ -1,7 +1,7 @@
 class ApiConfig {
   // Google Gemini API Configuration
   static const String geminiApiKey = 'AIzaSyDUmxOhRkjal-y5jP-4o3wCZ41r323VKMo';
-  static const String geminiBaseUrl = 'https://generativelanguage.googleapis.com/v1/models/gemini-1.0-pro:generateContent';
+  static const String geminiBaseUrl = 'https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent';
   
   // API Endpoints
   static const String geminiGenerateContent = '$geminiBaseUrl?key=$geminiApiKey';

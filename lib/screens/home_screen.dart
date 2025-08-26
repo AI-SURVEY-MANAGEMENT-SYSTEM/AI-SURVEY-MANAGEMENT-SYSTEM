@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:ui';
 import 'package:provider/provider.dart';
 import '../providers/language_provider.dart';
 import '../providers/survey_provider.dart';
@@ -63,7 +64,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       appBar: AppBar(
         title: const Text('AI Survey Assistant'),
         backgroundColor: Colors.white, // <-- Set to white for visibility
-        elevation: 0,
+        elevation: 6,
+        shadowColor: Colors.black12,
+        shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.vertical(bottom: Radius.circular(20)),
+        ),
         iconTheme: const IconThemeData(color: Colors.black), // <-- Change icon color to black
         actions: [
           IconButton(
@@ -76,10 +81,11 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
             colors: [
-              Theme.of(context).colorScheme.primary.withOpacity(0.1),
+              Theme.of(context).colorScheme.primary.withOpacity(0.08),
+              Theme.of(context).colorScheme.secondary.withOpacity(0.06),
               Colors.white,
             ],
           ),
@@ -93,56 +99,59 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   position: _slideAnimation,
                   child: Padding(
                     padding: const EdgeInsets.all(24.0),
-                    child: Column(
-                      children: [
-                        // Header Section
-                        _buildHeader(context),
-                        
-                        const SizedBox(height: 24),
-                        
-                        // Language Selection Card
-                        _buildLanguageCard(context, languageProvider),
-                        
-                        const SizedBox(height: 16),
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          // Header Section
+                          _buildHeader(context),
+                          
+                          const SizedBox(height: 24),
+                          
+                          // Language Selection Card
+                          _buildLanguageCard(context, languageProvider),
+                          
+                          const SizedBox(height: 16),
 
-                        // Highlights Card
-                        _buildHighlightsCard(context),
+                          // Highlights Card
+                          _buildHighlightsCard(context),
 
-                        const SizedBox(height: 16),
+                          const SizedBox(height: 16),
 
-                        // How It Works Card
-                        _buildHowItWorksCard(context),
-                        
-                        const SizedBox(height: 16),
+                          // How It Works Card
+                          _buildHowItWorksCard(context),
+                          
+                          const SizedBox(height: 16),
 
-                        // Privacy Card
-                        _buildPrivacyCard(context),
-                        
-                        const SizedBox(height: 24),
-                        
-                        // Survey Progress Card
-                        if (surveyProvider.questions.isNotEmpty)
-                          _buildProgressCard(context, surveyProvider),
-                        if (surveyProvider.error != null)
-                          Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 12),
-                            child: Text(
-                              surveyProvider.error!,
-                              style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
-                              textAlign: TextAlign.center,
+                          // Privacy Card
+                          _buildPrivacyCard(context),
+                          
+                          const SizedBox(height: 24),
+                          
+                          // Survey Progress Card
+                          if (surveyProvider.questions.isNotEmpty)
+                            _buildProgressCard(context, surveyProvider),
+                          if (surveyProvider.error != null)
+                            Padding(
+                              padding: const EdgeInsets.symmetric(vertical: 12),
+                              child: Text(
+                                surveyProvider.error!,
+                                style: const TextStyle(color: Colors.red, fontWeight: FontWeight.bold),
+                                textAlign: TextAlign.center,
+                              ),
                             ),
-                          ),
-                        
-                        const Spacer(),
-                        
-                        // Action Buttons
-                        _buildActionButtons(context, surveyProvider),
-                        
-                        const SizedBox(height: 24),
-                        
-                        // Footer
-                        _buildFooter(context),
-                      ],
+                          
+                          const SizedBox(height: 24),
+                          
+                          // Action Buttons
+                          _buildActionButtons(context, surveyProvider),
+                          
+                          const SizedBox(height: 24),
+                          
+                          // Footer
+                          _buildFooter(context),
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -154,58 +163,107 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     );
   }
 
+  Widget _glassContainer({required Widget child}) {
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(20),
+      child: BackdropFilter(
+        filter: ImageFilter.blur(sigmaX: 14, sigmaY: 14),
+        child: Container(
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            gradient: LinearGradient(
+              colors: [
+                Colors.white.withOpacity(0.65),
+                Colors.white.withOpacity(0.35),
+              ],
+              begin: Alignment.topLeft,
+              end: Alignment.bottomRight,
+            ),
+            border: Border.all(color: Colors.white.withOpacity(0.4)),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.05),
+                blurRadius: 20,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: child,
+        ),
+      ),
+    );
+  }
+
   Widget _buildHeader(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+    final bool isSmall = screenWidth < 360;
+    final bool isMedium = screenWidth >= 360 && screenWidth < 480;
+
+    final double outerPadding = isSmall ? 16 : isMedium ? 20 : 24;
+    final double iconContainerPadding = isSmall ? 16 : isMedium ? 20 : 24;
+    final double iconSize = isSmall ? 36 : isMedium ? 42 : 48;
+    final double gapAfterIcon = isSmall ? 16 : isMedium ? 20 : 24;
+    final double titleFontSize = isSmall ? 20 : isMedium ? 22 : 24;
+    final double taglinePaddingV = isSmall ? 6 : 8;
+    final double taglinePaddingH = isSmall ? 12 : 16;
+
+    final languageCode = context.read<LanguageProvider>().currentLanguageCode;
+    final title = LanguageUtils.getAppTitle(languageCode);
+    final tagline = LanguageUtils.getAppTagline(languageCode);
+
     return Container(
-      padding: const EdgeInsets.all(24),
+      padding: EdgeInsets.all(outerPadding),
       decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(28),
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: [
-            Theme.of(context).colorScheme.primary.withOpacity(0.1),
-            Theme.of(context).colorScheme.secondary.withOpacity(0.05),
+            Theme.of(context).colorScheme.primary.withOpacity(0.15),
+            Theme.of(context).colorScheme.secondary.withOpacity(0.08),
+            Colors.white.withOpacity(0.1),
           ],
         ),
-        borderRadius: BorderRadius.circular(24),
         boxShadow: [
           BoxShadow(
             color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
+            blurRadius: 30,
+            offset: const Offset(0, 15),
           ),
         ],
       ),
       child: Column(
         children: [
-          // App Logo with Modern Design
           Container(
-            padding: const EdgeInsets.all(24),
+            padding: EdgeInsets.all(iconContainerPadding),
             decoration: BoxDecoration(
               gradient: LinearGradient(
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
                 colors: [
                   Theme.of(context).colorScheme.primary,
                   Theme.of(context).colorScheme.primary.withOpacity(0.8),
+                  Theme.of(context).colorScheme.secondary.withOpacity(0.6),
                 ],
               ),
               shape: BoxShape.circle,
               boxShadow: [
                 BoxShadow(
-                  color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
-                  blurRadius: 15,
-                  offset: const Offset(0, 8),
+                  color: Theme.of(context).colorScheme.primary.withOpacity(0.4),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
                 ),
               ],
             ),
-            child: const Icon(
+            child: Icon(
               Icons.quiz,
-              size: 48,
+              size: iconSize,
               color: Colors.white,
             ),
           ),
           
-          const SizedBox(height: 24),
+          SizedBox(height: gapAfterIcon),
           
-          // Welcome Text with Modern Typography
           ShaderMask(
             shaderCallback: (bounds) => LinearGradient(
               colors: [
@@ -214,34 +272,35 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               ],
             ).createShader(bounds),
             child: Text(
-              'AI Survey Assistant',
+              title,
               style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
+                fontSize: titleFontSize,
               ),
               textAlign: TextAlign.center,
             ),
           ),
           
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           
           Container(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            padding: EdgeInsets.symmetric(horizontal: taglinePaddingH, vertical: taglinePaddingV),
             decoration: BoxDecoration(
-              color: Colors.white,
-              borderRadius: BorderRadius.circular(20),
+              color: Colors.white.withOpacity(0.9),
+              borderRadius: BorderRadius.circular(24),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.grey.withOpacity(0.1),
-                  blurRadius: 8,
+                  color: Colors.black.withOpacity(0.05),
+                  blurRadius: 10,
                   offset: const Offset(0, 4),
                 ),
               ],
             ),
             child: Text(
-              'Your intelligent companion for government surveys',
+              tagline,
               style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                color: Colors.grey[700],
+                color: Colors.black87,
                 fontWeight: FontWeight.w600,
               ),
               textAlign: TextAlign.center,
@@ -253,32 +312,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Widget _buildLanguageCard(BuildContext context, LanguageProvider languageProvider) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [
-            Colors.white,
-            Colors.grey.shade50,
-          ],
-        ),
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.grey.withOpacity(0.1),
-            blurRadius: 15,
-            offset: const Offset(0, 8),
-          ),
-        ],
-      ),
+    return _glassContainer(
       child: Material(
         color: Colors.transparent,
         child: InkWell(
           onTap: () => _navigateToLanguageSelection(context),
           borderRadius: BorderRadius.circular(20),
           child: Padding(
-            padding: const EdgeInsets.all(24),
+            padding: const EdgeInsets.all(20),
             child: Row(
               children: [
                 Container(
@@ -294,8 +335,8 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                     boxShadow: [
                       BoxShadow(
                         color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
-                        blurRadius: 8,
-                        offset: const Offset(0, 4),
+                        blurRadius: 12,
+                        offset: const Offset(0, 6),
                       ),
                     ],
                   ),
@@ -313,7 +354,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       Text(
                         'Current Language',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.grey[600],
+                          color: Colors.black54,
                           fontWeight: FontWeight.w500,
                         ),
                       ),
@@ -324,7 +365,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                         ),
                         style: Theme.of(context).textTheme.titleLarge?.copyWith(
                           fontWeight: FontWeight.bold,
-                          color: Colors.grey[800],
+                          color: Colors.black87,
                         ),
                       ),
                     ],
@@ -351,9 +392,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Widget _buildHighlightsCard(BuildContext context) {
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+    return _glassContainer(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -364,7 +403,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                    color: Theme.of(context).colorScheme.primary.withOpacity(0.12),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
@@ -387,7 +426,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             const SizedBox(height: 8),
             _featureRow(context, Icons.smart_toy_rounded, 'AI assistance', 'Get clear explanations for tricky questions'),
             const SizedBox(height: 8),
-            _featureRow(context, Icons.offline_bolt_rounded, 'Reliable experience', 'Works even if AI is unavailable temporarily'),
+            _featureRow(context, Icons.offline_bolt_rounded, 'Reliable experience', 'Works even if AI is temporarily unavailable'),
           ],
         ),
       ),
@@ -398,7 +437,14 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     return Row(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Icon(icon, color: Theme.of(context).colorScheme.primary),
+        Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(10),
+          ),
+          child: Icon(icon, color: Theme.of(context).colorScheme.primary, size: 18),
+        ),
         const SizedBox(width: 12),
         Expanded(
           child: Column(
@@ -406,7 +452,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             children: [
               Text(title, style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600)),
               const SizedBox(height: 2),
-              Text(subtitle, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey[700])),
+              Text(subtitle, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.black54)),
             ],
           ),
         ),
@@ -415,9 +461,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Widget _buildHowItWorksCard(BuildContext context) {
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+    return _glassContainer(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -428,7 +472,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Theme.of(context).colorScheme.secondary.withOpacity(0.1),
+                    color: Theme.of(context).colorScheme.secondary.withOpacity(0.12),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Icon(
@@ -467,7 +511,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
           height: 24,
           alignment: Alignment.center,
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+            color: Theme.of(context).colorScheme.primary.withOpacity(0.12),
             borderRadius: BorderRadius.circular(6),
           ),
           child: Text(step, style: Theme.of(context).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.bold)),
@@ -479,7 +523,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             children: [
               Text(title, style: Theme.of(context).textTheme.bodyLarge?.copyWith(fontWeight: FontWeight.w600)),
               const SizedBox(height: 2),
-              Text(subtitle, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey[700])),
+              Text(subtitle, style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.black54)),
             ],
           ),
         ),
@@ -488,9 +532,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   }
 
   Widget _buildPrivacyCard(BuildContext context) {
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+    return _glassContainer(
       child: Padding(
         padding: const EdgeInsets.all(16),
         child: Column(
@@ -501,7 +543,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 Container(
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.green.withOpacity(0.1),
+                    color: Colors.green.withOpacity(0.12),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: const Icon(
@@ -522,7 +564,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             const SizedBox(height: 12),
             Text(
               'Your answers stay on your device unless you choose to share them. We use respectful language and clear guidance to help you answer confidently.',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.grey[700]),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: Colors.black54),
             ),
           ],
         ),
@@ -535,9 +577,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     final completedQuestions = surveyProvider.responses.length;
     final totalQuestions = surveyProvider.questions.length;
     
-    return Card(
-      elevation: 4,
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+    return _glassContainer(
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
@@ -546,18 +586,18 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
             Row(
               children: [
                 Container(
-                  padding: const EdgeInsets.all(8),
+                  padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    color: progress > 0 ? Colors.green.withOpacity(0.1) : Colors.grey.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(8),
+                    color: progress > 0 ? Colors.green.withOpacity(0.15) : Colors.grey.withOpacity(0.15),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   child: Icon(
                     progress > 0 ? Icons.check_circle : Icons.assignment,
                     color: progress > 0 ? Colors.green : Colors.grey,
-                    size: 20,
+                    size: 24,
                   ),
                 ),
-                const SizedBox(width: 12),
+                const SizedBox(width: 16),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
@@ -565,13 +605,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                       Text(
                         'Survey Progress',
                         style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.w700,
                         ),
                       ),
                       Text(
                         '$completedQuestions of $totalQuestions questions answered',
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Colors.grey[600],
+                          color: Colors.black54,
                         ),
                       ),
                     ],
@@ -579,22 +619,47 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                 ),
               ],
             ),
-            const SizedBox(height: 16),
-            LinearProgressIndicator(
-              value: progress,
-              backgroundColor: Colors.grey[200],
-              valueColor: AlwaysStoppedAnimation<Color>(
-                progress > 0 ? Colors.green : Theme.of(context).colorScheme.primary,
+            const SizedBox(height: 20),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(10),
+              child: LinearProgressIndicator(
+                value: progress,
+                backgroundColor: Colors.grey.withOpacity(0.2),
+                valueColor: AlwaysStoppedAnimation<Color>(
+                  progress > 0 ? Colors.green : Theme.of(context).colorScheme.primary,
+                ),
+                minHeight: 12,
               ),
-              minHeight: 8,
             ),
-            const SizedBox(height: 8),
-            Text(
-              '${(progress * 100).round()}% Complete',
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.w600,
-                color: progress > 0 ? Colors.green : Colors.grey[600],
-              ),
+            const SizedBox(height: 12),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  '${(progress * 100).round()}% Complete',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: progress > 0 ? Colors.green : Colors.grey[600],
+                  ),
+                ),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: progress > 0 ? Colors.green.withOpacity(0.1) : Colors.grey.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: progress > 0 ? Colors.green.withOpacity(0.3) : Colors.grey.withOpacity(0.3),
+                    ),
+                  ),
+                  child: Text(
+                    '$completedQuestions/$totalQuestions',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      fontWeight: FontWeight.w600,
+                      color: progress > 0 ? Colors.green : Colors.grey[600],
+                    ),
+                  ),
+                ),
+              ],
             ),
           ],
         ),
@@ -606,10 +671,25 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
     final languageProvider = Provider.of<LanguageProvider>(context, listen: false);
     return Column(
       children: [
-        // Start/Continue Survey Button
-        SizedBox(
+        Container(
           width: double.infinity,
-          height: 56,
+          height: 60,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(20),
+            gradient: LinearGradient(
+              colors: [
+                Theme.of(context).colorScheme.primary,
+                Theme.of(context).colorScheme.primary.withOpacity(0.8),
+              ],
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                blurRadius: 15,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
           child: ElevatedButton.icon(
             onPressed: surveyProvider.isLoading
                 ? null
@@ -621,13 +701,13 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
                   },
             icon: surveyProvider.isLoading
                 ? const SizedBox(
-                    width: 20,
-                    height: 20,
+                    width: 24,
+                    height: 24,
                     child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
                   )
                 : Icon(
                     surveyProvider.responses.isNotEmpty ? Icons.play_arrow : Icons.play_arrow,
-                    size: 24,
+                    size: 28,
                   ),
             label: Text(
               surveyProvider.responses.isNotEmpty ? 'Continue Survey' : 'Start Survey',
@@ -637,28 +717,38 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
               ),
             ),
             style: ElevatedButton.styleFrom(
-              backgroundColor: Theme.of(context).colorScheme.primary,
+              backgroundColor: Colors.transparent,
               foregroundColor: Colors.white,
-              elevation: 4,
+              elevation: 0,
+              shadowColor: Colors.transparent,
               shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(20),
               ),
             ),
           ),
         ),
         
         if (surveyProvider.responses.isNotEmpty) ...[
-          const SizedBox(height: 12),
-          SizedBox(
+          const SizedBox(height: 16),
+          Container(
             width: double.infinity,
-            height: 48,
+            height: 52,
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                width: 2,
+              ),
+              color: Colors.white.withOpacity(0.8),
+            ),
             child: OutlinedButton.icon(
               onPressed: () => _resetSurvey(context, surveyProvider),
               icon: const Icon(Icons.refresh, size: 20),
               label: const Text('Start New Survey'),
               style: OutlinedButton.styleFrom(
                 foregroundColor: Theme.of(context).colorScheme.primary,
-                side: BorderSide(color: Theme.of(context).colorScheme.primary),
+                backgroundColor: Colors.transparent,
+                side: BorderSide.none,
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(16),
                 ),
@@ -673,26 +763,33 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
   Widget _buildFooter(BuildContext context) {
     return Column(
       children: [
-        Container(
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-          decoration: BoxDecoration(
-            color: Colors.grey[100],
-            borderRadius: BorderRadius.circular(20),
+        Center(
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            decoration: BoxDecoration(
+              color: Colors.white.withOpacity(0.8),
+              borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: Colors.grey.withOpacity(0.2)),
+            ),
+            child: Text(
+              'National Initiative for Inclusive Data Collection',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: Colors.black54,
+                fontWeight: FontWeight.w500,
+              ),
+              textAlign: TextAlign.center,
+            ),
           ),
+        ),
+        const SizedBox(height: 12),
+        Center(
           child: Text(
-            'National Initiative for Inclusive Data Collection',
+            'Made with ❤️ for India',
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: Colors.grey[600],
+              color: Colors.black38,
               fontWeight: FontWeight.w500,
             ),
             textAlign: TextAlign.center,
-          ),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          'Made with ❤️ for India',
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Colors.grey[500],
           ),
         ),
       ],
@@ -720,7 +817,7 @@ class _HomeScreenState extends State<HomeScreen> with TickerProviderStateMixin {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
           title: const Text('Start New Survey?'),
           content: const Text(
             'This will clear all your current responses. Are you sure you want to start a new survey?',
